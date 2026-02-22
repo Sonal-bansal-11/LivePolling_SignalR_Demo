@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR Live Voting</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+</head>
+<body>
+    <h1>Live Voting Demo</h1>
+    <div id="poll-container">
+        <p>Option A: <span id="optA">0</span> <button onclick="vote('Option A')">Vote A</button></p>
+        <p>Option B: <span id="optB">0</span> <button onclick="vote('Option B')">Vote B</button></p>
+    </div>
+
+    <script>
+        // 1. Connect to the Hub URL we mapped in Program.cs
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/pollHub")
+            .build();
+
+        // 2. Listen for the "ReceiveVoteUpdate" message from the server
+        connection.on("ReceiveVoteUpdate", (pollId, option, count) => {
+            if(option === "Option A") document.getElementById("optA").innerText = count;
+            if(option === "Option B") document.getElementById("optB").innerText = count;
+        });
+
+        // 3. Start the connection
+        connection.start().catch(err => console.error(err));
+
+        // 4. Function to call our API Controller to cast a vote
+        function vote(opt) {
+            fetch(`/api/Poll/vote?id=1&option=${opt}`, { method: 'POST' });
+        }
+    </script>
+</body>
+</html>
